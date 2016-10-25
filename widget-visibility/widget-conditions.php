@@ -75,6 +75,11 @@ class Jetpack_Widget_Conditions {
 			case 'role':
 				global $wp_roles;
 
+				// XTEC ************ AFEGIT - Add hook to cleanly modify $wp_roles from agora-functions.php
+				// 2016.05.17 @aginard
+				do_action( 'widget_visibility_roles' );
+				//************ FI
+
 				foreach ( $wp_roles->roles as $role_key => $role ) {
 					?>
 					<option value="<?php echo esc_attr( $role_key ); ?>" <?php selected( $role_key, $minor ); ?> ><?php echo esc_html( $role['name'] ); ?></option>
@@ -116,6 +121,17 @@ class Jetpack_Widget_Conditions {
 				<option value="archive" <?php selected( 'archive', $minor ); ?>><?php _e( 'Archive page', 'jetpack' ); ?></option>
 				<option value="404" <?php selected( '404', $minor ); ?>><?php _e( '404 error page', 'jetpack' ); ?></option>
 				<option value="search" <?php selected( 'search', $minor ); ?>><?php _e( 'Search results', 'jetpack' ); ?></option>
+				
+                <!-- XTEC ************ AFEGIT - Add options for buddypress pages
+                // 2015.10.07 @jmeler -->
+                <optgroup label="<?php esc_attr_e( 'BuddyPress:', 'jetpack' ); ?>">
+                    <option value="activity" <?php selected( 'activity', $minor ); ?>><?php _e( 'Activity', 'jetpack' ); ?></option>
+                    <option value="group" <?php selected( 'group', $minor ); ?>><?php _e( 'Groups', 'jetpack' ); ?></option>
+                    <option value="member" <?php selected( 'member', $minor ); ?>><?php _e( 'Members', 'jetpack' ); ?></option>
+                    <option value="docs-index" <?php selected( 'docs-index', $minor ); ?>><?php _e( 'BuddyPress Docs Archive', 'jetpack' ); ?></option>
+                </optgroup>
+                <!--************ FI -->
+                                
 				<optgroup label="<?php esc_attr_e( 'Post type:', 'jetpack' ); ?>">
 					<?php
 
@@ -319,9 +335,16 @@ class Jetpack_Widget_Conditions {
 									<option value="date" <?php selected( "date", $rule['major'] ); ?>><?php echo esc_html_x( 'Date', 'Noun, as in: "This page is a date archive."', 'jetpack' ); ?></option>
 									<option value="page" <?php selected( "page", $rule['major'] ); ?>><?php echo esc_html_x( 'Page', 'Example: The user is looking at a page, not a post.', 'jetpack' ); ?></option>
 									<option value="post_type" <?php selected( "post_type", $rule['major'] ); ?>><?php echo esc_html_x( 'Post Type', 'Example: the user is viewing a custom post type archive.', 'jetpack' ); ?></option>
+
+									<!-- XTEC ************ ELIMINAT - Removed option "Taxonomy" -->
+									<!-- 2016.05.17 @aginard -->
+									<!--
 									<?php if ( get_taxonomies( array( '_builtin' => false ) ) ) : ?>
 										<option value="taxonomy" <?php selected( "taxonomy", $rule['major'] ); ?>><?php echo esc_html_x( 'Taxonomy', 'Noun, as in: "This post has one taxonomy."', 'jetpack' ); ?></option>
 									<?php endif; ?>
+									-->
+									<!-- ************ FI -->
+
 								</select>
 
 								<?php _ex( 'is', 'Widget Visibility: {Rule Major [Page]} is {Rule Minor [Search results]}', 'jetpack' ); ?>
@@ -559,6 +582,26 @@ class Jetpack_Widget_Conditions {
 									$condition_result = is_front_page() && !is_paged();
 								}
 							break;
+
+                            // XTEC ************ AFEGIT - Added post_type for index bp_doc
+                            // 2015.05.12 @jmeler
+                            case 'docs-index':
+                                $condition_result = is_post_type_archive('bp_doc');
+                            break;
+
+                            // 2015.10.07 @jmeler - Added buddypress pages
+                            case 'activity':
+                                $condition_result = bp_is_activity_component();
+                            break;
+                            case 'group':
+                                $condition_result = bp_is_group();
+                            break;
+                            case 'member':
+                                $condition_result = bp_is_user();
+                            break;
+
+                            //--************ FI
+
 							default:
 								if ( substr( $rule['minor'], 0, 10 ) == 'post_type-' ) {
 									$condition_result = is_singular( substr( $rule['minor'], 10 ) );
@@ -567,7 +610,14 @@ class Jetpack_Widget_Conditions {
 									$condition_result = $wp_query->is_posts_page;
 								} else {
 									// $rule['minor'] is a page ID
+// XTEC ************ MODIFICAT - To avoid problem with activity menus after upgrading to WP 4.4
+// 2016.05.30 @sarjona
+									$condition_result = is_page( $rule['minor'] );
+//************ ORIGINAL
+/*
 									$condition_result = is_page() && ( $rule['minor'] == get_the_ID() );
+*/
+//************ FI
 
 									// Check if $rule['minor'] is parent of page ID
 									if ( ! $condition_result && isset( $rule['has_children'] ) && $rule['has_children'] )
@@ -599,7 +649,16 @@ class Jetpack_Widget_Conditions {
 							if ( is_category( $rule['minor'] ) ) {
 								$condition_result = true;
 							} else if ( is_singular() && $rule['minor'] && in_array( 'category', get_post_taxonomies() ) &&  has_category( $rule['minor'] ) )
+
+                            //XTEC ************ MODIFICAT - Don't show category widgets in a simple post
+                            //2014.09.15 @jmeler
+                                $condition_result = false;
+                            //************ ORIGINAL
+                            /*
 								$condition_result = true;
+                            */
+                            //************ FI
+
 						}
 					break;
 					case 'loggedin':
