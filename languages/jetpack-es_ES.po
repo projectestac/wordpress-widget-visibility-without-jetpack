@@ -77,27 +77,22 @@ msgstr "Página de error 404 "
 msgid "Search results"
 msgstr "Resultados de búsqueda"
 
-#AFEGIT XTEC
 #: widget-visibility/widget-conditions.php:122
 msgid "BuddyPress:"
 msgstr "BuddyPress:"
 
-#AFEGIT XTEC
 #: widget-visibility/widget-conditions.php:123
 msgid "Activity"
 msgstr "Actividad"
 
-#AFEGIT XTEC
 #: widget-visibility/widget-conditions.php:124
 msgid "Groups"
 msgstr "Grupos"
 
-#AFEGIT XTEC
 #: widget-visibility/widget-conditions.php:125
 msgid "Members"
 msgstr "Miembros"
 
-#AFEGIT XTEC
 #: widget-visibility/widget-conditions.php:126
 msgid "BuddyPress Docs Archive"
 msgstr "Índice de documentos"
