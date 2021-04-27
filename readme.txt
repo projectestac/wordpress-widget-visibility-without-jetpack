@@ -1,10 +1,11 @@
 === Plugin Name ===
-Contributors: boluda, toniginard
+Contributors: boluda, toniginard, unitepress
 Donate link: http://boluda.com/donate
 Tags: widget visibility
 Requires at least: 3.5.0
 Tested up to: 4.4
 Stable tag: 1.1
+Version: 1.2
 License: GPLv2 or Alter
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +22,9 @@ Control what pages your widgets appear on. Based on Widget Visibility module, fr
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+= 1.2 =
+* Contributors
 
 = 1.1 =
 * Updated to match Jetpack 4.0.2
