@@ -85,6 +85,11 @@ class Jetpack_Widget_Conditions {
 
 		global $wp_roles;
 
+        // XTEC ************ AFEGIT - Add hook to cleanly modify $wp_roles from agora-functions.php
+        // 2016.05.17 @aginard
+        do_action( 'widget_visibility_roles' );
+        //************ FI
+
 		foreach ( $wp_roles->roles as $role_key => $role ) {
 			$widget_conditions_data['role'][] = array( (string) $role_key, $role['name'] );
 		}
@@ -127,6 +132,18 @@ class Jetpack_Widget_Conditions {
 		$widget_conditions_data['page'][] = array( '404', __( '404 error page', 'jetpack' ) );
 		$widget_conditions_data['page'][] = array( 'search', __( 'Search results', 'jetpack' ) );
 
+        // XTEC ************ AFEGIT - Add options for buddypress pages
+        // 2015.10.07 @jmeler
+        // 2021.04.27 @aginard
+        $buddypress_pages = [
+                ['activity', __( 'Activity', 'jetpack' )],
+                ['group', __( 'Groups', 'jetpack' )],
+                ['member', __( 'Members', 'jetpack' )],
+                ['docs-index', __( 'BuddyPress Docs Archive', 'jetpack' )],
+        ];
+        $widget_conditions_data['page'][] = array( __( 'BuddyPress:', 'jetpack' ), $buddypress_pages );
+        //************ FI
+
 		$post_types = get_post_types( array( 'public' => true ), 'objects' );
 
 		$widget_conditions_post_types         = array();
@@ -165,6 +182,12 @@ class Jetpack_Widget_Conditions {
 		}
 
 		$widget_conditions_data['page'][] = array( __( 'Static page:', 'jetpack' ), $static_pages );
+
+		// XTEC ************ AFEGIT - Added option to select a Buddypress group (Node)
+		// 2021.04.27 @aginard
+		global $wpdb;
+		$widget_conditions_data['node'] = $wpdb->get_results("SELECT id, name FROM wp_bp_groups ORDER BY name ASC", ARRAY_N);
+		//************ FI
 
 		$widget_conditions_data['taxonomy']   = array();
 		$widget_conditions_data['taxonomy'][] = array( '', __( 'All taxonomy pages', 'jetpack' ) );
@@ -382,9 +405,21 @@ class Jetpack_Widget_Conditions {
 									<option value="tag" <?php selected( 'tag', $rule['major'] ); ?>><?php echo esc_html_x( 'Tag', 'Noun, as in: "This post has one tag."', 'jetpack' ); ?></option>
 									<option value="date" <?php selected( 'date', $rule['major'] ); ?>><?php echo esc_html_x( 'Date', 'Noun, as in: "This page is a date archive."', 'jetpack' ); ?></option>
 									<option value="page" <?php selected( 'page', $rule['major'] ); ?>><?php echo esc_html_x( 'Page', 'Example: The user is looking at a page, not a post.', 'jetpack' ); ?></option>
+
+									<!-- XTEC ************ AFEGIT - Added option "Node"  -->
+									<!-- 2016.06.13 @xaviernietosanchez -->
+									<option value="node" <?php selected( "node", $rule['major'] ); ?>><?php echo esc_html_x( 'Group', 'Example: The user is looking at a page, not a post.', 'jetpack' ); ?></option>
+									<!-- ************ FI -->
+
+									<!-- XTEC ************ ELIMINAT - Removed option "Taxonomy" -->
+									<!-- 2016.05.17 @aginard -->
+									<!--
 									<?php if ( get_taxonomies( array( '_builtin' => false ) ) ) : ?>
 										<option value="taxonomy" <?php selected( 'taxonomy', $rule['major'] ); ?>><?php echo esc_html_x( 'Taxonomy', 'Noun, as in: "This post has one taxonomy."', 'jetpack' ); ?></option>
 									<?php endif; ?>
+									-->
+									<!-- ************ FI -->
+
 								</select>
 
 								<?php _ex( 'is', 'Widget Visibility: {Rule Major [Page]} is {Rule Minor [Search results]}', 'jetpack' ); ?>
@@ -663,6 +698,24 @@ class Jetpack_Widget_Conditions {
 									$condition_result = is_front_page() && ! is_paged();
 								}
 								break;
+
+							// XTEC ************ AFEGIT - Added post_type for index bp_doc
+							// 2015.05.12 @jmeler
+							case 'docs-index':
+								$condition_result = is_post_type_archive('bp_doc');
+								break;
+							// 2015.10.07 @jmeler - Added buddypress pages
+							case 'activity':
+								$condition_result = bp_is_activity_component();
+								break;
+							case 'group':
+								$condition_result = bp_is_group();
+								break;
+							case 'member':
+								$condition_result = bp_is_user();
+								break;
+							//************ FI
+
 							default:
 								if ( substr( $rule['minor'], 0, 10 ) == 'post_type-' ) {
 									$condition_result = is_singular( substr( $rule['minor'], 10 ) );
@@ -673,7 +726,15 @@ class Jetpack_Widget_Conditions {
 									$condition_result = $wp_query->is_posts_page;
 								} else {
 									// $rule['minor'] is a page ID
+
+									// XTEC ************ MODIFICAT - Avoid problem with activity menus after upgrading to WP 4.4
+									// 2016.05.30 @sarjona
+									$condition_result = is_page( $rule['minor'] );
+									//************ ORIGINAL
+									/*
 									$condition_result = is_page() && ( $rule['minor'] == get_the_ID() );
+									*/
+									//************ FI
 
 									// Check if $rule['minor'] is parent of page ID
 									if ( ! $condition_result && isset( $rule['has_children'] ) && $rule['has_children'] ) {
@@ -720,7 +781,16 @@ class Jetpack_Widget_Conditions {
 						if ( is_category( $rule['minor'] ) ) {
 							$condition_result = true;
 						} elseif ( is_singular() && has_term( $rule['minor'], 'category' ) ) {
+
+							// XTEC ************ MODIFICAT - Don't show category widgets in a simple post
+							// 2014.09.15 @jmeler
+							$condition_result = false;
+							//************ ORIGINAL
+							/*
 							$condition_result = true;
+							*/
+							//************ FI
+
 						}
 						break;
 					case 'loggedin':
@@ -800,6 +870,24 @@ class Jetpack_Widget_Conditions {
 							$condition_result = true;
 						}
 						break;
+
+					// XTEC ************ AFEGIT - Check minor options to display or not display at the current page
+					// 2016.06.13 @xaviernietosanchez
+					case 'node':
+						if ( ! $rule['minor'] && bp_is_group() ) {
+							$condition_result = true;
+						} else {
+							$current_group = bp_get_current_group_id();
+							$rule['minor'] = self::maybe_get_split_term( $rule['minor'], $rule['major'] );
+							if ( bp_is_group( $rule['minor'] ) && $current_group == $rule['minor'] ) {
+								$condition_result = true;
+							} else {
+								$condition_result = false;
+							}
+						}
+						break;
+					//************ FI
+
 				}
 
 				if ( $condition_result || self::$passed_template_redirect ) {
