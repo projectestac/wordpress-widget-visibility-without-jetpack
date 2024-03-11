@@ -300,9 +300,6 @@ class Jetpack_Widget_Conditions {
         // 2015.10.07 @jmeler
         // 2021.04.27 @aginard
         $buddypress_pages = [
-                ['activity', __( 'Activity', 'jetpack' )],
-                ['group', __( 'Groups', 'jetpack' )],
-                ['member', __( 'Members', 'jetpack' )],
                 ['docs-index', __( 'BuddyPress Docs Archive', 'jetpack' )],
         ];
         $widget_conditions_data['page'][] = array( __( 'BuddyPress:', 'jetpack' ), $buddypress_pages );
@@ -346,13 +343,6 @@ class Jetpack_Widget_Conditions {
 		}
 
 		$widget_conditions_data['page'][] = array( __( 'Static page:', 'jetpack' ), $static_pages );
-
-		// XTEC ************ AFEGIT - Added option to select a Buddypress group (Node)
-		// 2021.04.27 @aginard
-		global $wpdb;
-		$widget_conditions_data['node'] = $wpdb->get_results("SELECT id, name FROM wp_bp_groups ORDER BY name ASC", ARRAY_N);
-		// ************ FI
-
 		$widget_conditions_data['taxonomy']   = array();
 		$widget_conditions_data['taxonomy'][] = array( '', __( 'All taxonomy pages', 'jetpack' ) );
 
@@ -584,11 +574,6 @@ class Jetpack_Widget_Conditions {
 									<option value="tag" <?php selected( 'tag', $rule['major'] ); ?>><?php echo esc_html_x( 'Tag', 'Noun, as in: "This post has one tag."', 'jetpack' ); ?></option>
 									<option value="date" <?php selected( 'date', $rule['major'] ); ?>><?php echo esc_html_x( 'Date', 'Noun, as in: "This page is a date archive."', 'jetpack' ); ?></option>
 									<option value="page" <?php selected( 'page', $rule['major'] ); ?>><?php echo esc_html_x( 'Page', 'Example: The user is looking at a page, not a post.', 'jetpack' ); ?></option>
-
-									<!-- XTEC ************ AFEGIT - Added option "Node"  -->
-									<!-- 2016.06.13 @xaviernietosanchez -->
-									<option value="node" <?php selected( "node", $rule['major'] ); ?>><?php echo esc_html_x( 'Group', 'Example: The user is looking at a page, not a post.', 'jetpack' ); ?></option>
-									<!-- ************ FI -->
 
 									<!-- XTEC ************ ELIMINAT - Removed option "Taxonomy" -->
 									<!-- 2016.05.17 @aginard -->
@@ -929,14 +914,11 @@ class Jetpack_Widget_Conditions {
 								$condition_result = is_post_type_archive('bp_doc');
 								break;
 							// 2015.10.07 @jmeler - Added buddypress pages
+							// 2024.03.11 @aginard - Disabled buddypress pages. Not removed to keep compatibility.
 							case 'activity':
-								$condition_result = bp_is_activity_component();
-								break;
 							case 'group':
-								$condition_result = bp_is_group();
-								break;
 							case 'member':
-								$condition_result = bp_is_user();
+								$condition_result = true;
 								break;
 							// ************ FI
 
@@ -1097,18 +1079,9 @@ class Jetpack_Widget_Conditions {
 
 					// XTEC ************ AFEGIT - Check minor options to display or not display at the current page
 					// 2016.06.13 @xaviernietosanchez
+					// 2024.03.11 @aginard - Disabled change. Not removed to keep compatibility.
 					case 'node':
-						if ( ! $rule['minor'] && bp_is_group() ) {
-							$condition_result = true;
-						} else {
-							$current_group = bp_get_current_group_id();
-							$rule['minor'] = self::maybe_get_split_term( $rule['minor'], $rule['major'] );
-							if ( bp_is_group( $rule['minor'] ) && $current_group == $rule['minor'] ) {
-								$condition_result = true;
-							} else {
-								$condition_result = false;
-							}
-						}
+						$condition_result = true;
 						break;
 					// ************ FI
 

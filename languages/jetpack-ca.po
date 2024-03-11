@@ -105,12 +105,6 @@ msgstr "Tipus de contingut:"
 msgid "Static page:"
 msgstr "Pàgina:"
 
-# ## AFEGIT XTEC ###
-#: widget-visibility/widget-conditions.php:165
-msgid "All groups"
-msgstr "Tots els nodes"
-
-# ## FI AFEGIT XTEC ###
 #: widget-visibility/widget-conditions.php:180
 msgid "All taxonomy pages"
 msgstr "Totes les pàgines de taxonomies"
@@ -209,13 +203,6 @@ msgctxt "Example: the user is viewing a custom post type archive."
 msgid "Post Type"
 msgstr "Tipus de contingut"
 
-# ## AFEGIT XTEC ###
-#: widget-visibility/widget-conditions.php:362
-msgctxt "Example: The user is looking at a page, not a post."
-msgid "Group"
-msgstr "Node"
-
-# ## FI AFEGIT XTEC ###
 #: widget-visibility/widget-conditions.php:369
 msgctxt "Noun, as in: \"This post has one taxonomy.\""
 msgid "Taxonomy"
